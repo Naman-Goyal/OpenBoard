@@ -1,0 +1,27 @@
+{
+  "name": "pepBoard",
+  "version": "1.0.0",
+  "description": "",
+  "main": "express.js",
+  "dependencies": {
+    "epress": "0.0.1-security",
+    "express": "^4.17.1",
+    "nodemon": "^2.0.6",
+    "socket.io": "^2.3.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "start": "nodemon express"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Pep-DEV101/PepBoard.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Pep-DEV101/PepBoard/issues"
+  },
+  "homepage": "https://github.com/Pep-DEV101/PepBoard#readme"
+}

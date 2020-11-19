@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+    <style>
+        .tool-panel{
+            height: 20vh;
+
+        }
+        .tools{
+            height: 100%;
+            display:flex;
+
+        }
+        .tool{
+            height: 100%;
+        }
+        .img{
+            height: 10%;
+        }
+    </style>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="sticky.css">
+</head>
+<body>
+    <div class="tool-panel">
+        <div class="tools">
+            <div class="tool">
+                <img src=./NewIcons/Blue_Pencil.svg" alt="" style="height: 60%;">
+                <div class="tool-optionw"></div>
+
+            </div>
+            <div class="tool">
+                <img src="./NewIcons/Eraser.svg" alt="" style="height: 60%;">
+                <div class="tool-optionw"></div>
+            </div>
+
+            <div class="tool">
+                <img src="./NewIcons/Undo.svg" alt="" class="img undo" style="height: 60%;">
+                <div class="tool-optionw"></div>
+            </div>
+
+            <div class="tool">
+                <img src="./NewIcons/Redo.svg" alt="" class="img redo" style="height: 60%;">
+                <div class="tool-optionw"></div>
+            </div>
+            <div class="tool">
+                <img src="./NewIcons/StickyNote.svg" alt="" class="img sticky" onclick="createSticky()" style="height: 60%;">
+                <div class="tool-optionw"></div>
+
+            </div>
+            <div class="tool">
+                <input type="file" name="" id="" class="input-img" accept="image/*">
+                <img src="./NewIcons/Photo.svg" alt="" class="upload-img tool-img" 
+                    onclick="handleToolChange('upload')" style="height: 60% ";>
+            </div>
+        </div>
+    </div>
+        <!-- tag to draw --> 
+        <canvas class="board"></canvas>
+        
+</body>
+
+<script>
+        //<!-- document represents current loaded page in browser --> 
+       
+    let board=document.querySelector(".board");
+    let  undo=document.querySelector(".undo");
+    let redo = document.querySelector(".redo");
+    const body = document.querySelector("body");
+    const uploadImg = document.querySelector(".upload-img");
+    const FileInput = document.querySelector(".input-img");
+    const ImageInput = document.querySelector(".upload-img");
+
+
+    //let navbar = document.querySelector(".navbar");
+    //let stickyNote = document.querySelector(".sticky");
+
+    board.height=window.innerHeight;
+    board.width=window.innerWidth;
+    // 2d=>tool to render on 2d
+    // canva reendering ContextId
+    //we gt an object that is used to draw on canvas
+    let ctx=board.getContext('2d')
+    //PROPERTIES
+    //these cordinates are with respective to cordinates
+    // by default color of ctx is black
+    //set style
+    ctx.fillStyle="white";
+    ctx.lineWidth=10;
+    // command to draw rectangle
+    ctx.fillRect(0,0,board.width,board.height);
+    // get the tool
+    ctx.strokeStyle="green";
+    
+    // ADD EVENT LISTENERS
+    //these cordinates are respective to html page
+    let isMouseDown=false;
+    let undostack=[];
+    let redostack = [];
+    let initialX = null;
+    let initialY = null;
+    let isStickyDown = false;
+    board.addEventListener("mousedown",function(e){
+        console.log('down fired');
+        let x=e.clientX;
+        let y=e.clientY;
+        isMouseDown=true;
+        ctx.beginPath();
+        ctx.moveTo(x,y);
+        let point={x,y,type:"md",color:ctx.strokeStyle,width:ctx.lineWidth}
+        undostack.push(point)
+
+    })
+
+
+    board.addEventListener("mousemove",function(e){
+        //console.log("board was clicked")
+        //console.log(e.clientX+" "+e.clientY);
+        let x=e.clientX;
+        let y=e.clientY-getBound();
+
+        if(isMouseDown==true){
+            ctx.lineTo(x,y);
+            ctx.stroke();
+            let point={x,y,type:"mm",color:ctx.strokeStyle,width:ctx.lineWidth}
+            undostack.push(point)
+
+
+        }
+    })
+
+    board.addEventListener("mouseup",function(e){
+        //console.log("board was clicked")        
+        isMouseDown=false;
+   
+    })
+    board.addEventListener("mouseleave",function(e){
+        //console.log("board was clicked")        
+        isMouseDown=false;
+   
+    })
+    let ref;
+    undo.addEventListener("mousedown",function(e){
+        let fn=function(){
+            if ( undostack.length > 0 ){
+                redostack.push(undostack.pop());
+                // redraw();
+            }
+        }
+        ref=setInterval(fn,1);
+    })
+
+    undo.addEventListener("mouseup",function(e){
+        clearInterval(ref);
+        redraw();
+       
+    })
+
+    redo.addEventListener("mousedown", function () {
+        let fn=function(){
+            if ( redostack.length > 0 ){
+                undostack.push(redostack.pop());
+                
+            }
+        }
+        ref=setInterval(fn,1);
+
+        });
+    redo.addEventListener("mouseup", function (e) {
+        clearInterval(ref);
+        redraw();
+    });
+    //
+    Image
+    uploadImg.addEventListener("click", function(e) {
+        // stops default behaviour os anchor
+        e.preventDefault();
+        FileInput.click();
+    FileInput.addEventListener("change", function(e) {
+        // console.log(e);
+        const writingPad = createBox();
+        const img = document.createElement("img");
+        // URL
+        let src = URL.createObjectURL(e.target.files[0]);
+        img.src = src;
+        img.setAttribute("class", "uploadedImgStyle");
+        writingPad.appendChild(img);
+        img.onload = function() {
+        URL.revokeObjectURL(img.src);
+    };
+  });
+});
+
+    //sticky
+   
+    function createSticky() {
+        console.log("first function")
+        const writingPad = createBox();
+        const textarea = document.createElement("textarea");
+        writingPad.appendChild(textarea);
+    }
+    function createBox(){
+            console.log("second function")
+            const stickyPad = document.createElement("div");
+            const navBar = document.createElement("div");
+            const writingPad = document.createElement("div");
+            const minimize = document.createElement("div");
+            const close = document.createElement("div");
+
+            stickyPad.setAttribute("class", "sticky-pad");
+            navBar.setAttribute("class", "nav");
+            writingPad.setAttribute("class", "writing-pad");
+            close.setAttribute("class", "close");
+            minimize.setAttribute("class", "minimize");
+
+            navBar.appendChild(minimize);
+            navBar.appendChild(close);
+            stickyPad.appendChild(navBar);
+            stickyPad.appendChild(writingPad);
+            body.appendChild(stickyPad);
+            // create sticky
+            close.addEventListener("click", function() {
+                stickyPad.remove();
+            });
+
+            let isMinimized = false;
+            minimize.addEventListener("click", function() {
+                isMinimized == false
+                ? (writingPad.style.display = "none")
+                : (writingPad.style.display = "block");
+                isMinimized = !isMinimized;
+            });
+
+            let initialX = null;
+            let initialY = null;
+            let isStickyDown = false;
+
+            // added move sticky logic
+            navBar.addEventListener("mousedown", function(e) {
+                initialX = e.clientX;
+                initialY = e.clientY;
+                isStickyDown = true;
+            });
+
+            navBar.addEventListener("mousemove", function(e) {
+                if (isStickyDown == true) {
+                let finalX = e.clientX;
+                let finalY = e.clientY;
+                let diffX = finalX - initialX;
+                let diffY = finalY - initialY;
+                let { top, left } = stickyPad.getBoundingClientRect();
+                stickyPad.style.top = top + diffY + "px";
+                stickyPad.style.left = left + diffX + "px";
+                initialX = finalX;
+                initialY = finalY;
+                }
+            });
+            // sticky => mouseup
+            navBar.addEventListener("mouseup", function() {
+                isStickyDown = false;
+            });
+            // pointer => moved off sticky
+            navBar.addEventListener("mouseleave", function() {
+                isStickyDown = false;
+            });
+            document.body.appendChild(stickyPad);
+            return writingPad;
+
+}
+
+
+
+
+
+    function redraw()
+    {
+        ctx.clearRect(0,0,board.width,board.height)
+        ctx.fillStyle="black";
+        ctx.fillRect(0,0,board.width,board.height)
+        for(let i=0;i<undostack.length;i++)
+        {
+            let {x,y,color,width,type}=undostack[i];
+            ctx.strokeStyle=color;
+            ctx.lineWidth=width;
+            if (type=="md"){
+                ctx.beginPath();
+                ctx.moveTo(x,y);
+            }
+            else if(type=="mm"){
+                ctx.lineTo(x,y);
+                ctx.stroke();
+
+            }
+        }
+    }
+    //ERASER 
+    //ctx.strokeStyle="WHITE";
+    // rest of code will be same as above
+
+    function getBound()
+    {
+        let { top } = board.getBoundingClientRect();
+        return top;
+    }
+
+
+</script>
+</html>
